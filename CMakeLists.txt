@@ -1077,6 +1077,11 @@ if(SDL_LIBC)
     endforeach()
 
     set(STDC_HEADER_NAMES "stddef.h;stdarg.h;stdlib.h;string.h;stdio.h;wchar.h;float.h")
+    if(SCARLET_NATIVE AND NOT HAVE_WCHAR_H)
+      # A missing optional wide-character header must not hide malloc, string
+      # and stdio functions which are actually present in the native runtime.
+      list(REMOVE_ITEM STDC_HEADER_NAMES "wchar.h")
+    endif()
     check_include_files("${STDC_HEADER_NAMES}" STDC_HEADERS)
     check_symbol_exists(M_PI math.h HAVE_M_PI)
     # TODO: refine the mprotect check
@@ -2969,6 +2974,42 @@ if(HAVE_VULKAN AND NOT SDL_LOADSO)
 endif()
 
 # Platform-independent options
+if(SCARLET_NATIVE)
+  get_filename_component(SCARLET_FLOAT_ARCHIVE "${SDL2_SOURCE_DIR}/../sysroot/lib/libscarlet_float.a" ABSOLUTE)
+  if(NOT EXISTS "${SCARLET_FLOAT_ARCHIVE}")
+    message(FATAL_ERROR "Build native float adapters with port/build-float.sh first")
+  endif()
+  list(APPEND EXTRA_LDFLAGS "${SCARLET_FLOAT_ARCHIVE}")
+  # Experimental Scarlet Native backend. It uses Scarlet's std-backed C ABI,
+  # never Linux syscalls or a host pthread runtime.
+  set(SDL_THREAD_PTHREAD 1)
+  option(SDL_SCARLET_VIDEO "Native Scarlet SWS video backend" ON)
+  if(SDL_SCARLET_VIDEO AND SDL_VIDEO)
+    set(SDL_VIDEO_DRIVER_SCARLET 1)
+    target_compile_definitions(sdl-build-options INTERFACE SDL_VIDEO_DRIVER_SCARLET=1)
+    get_filename_component(SCARLET_SWS_DIR "${SDL2_SOURCE_DIR}/../Scarlet/user/lib/sws-client-c" ABSOLUTE)
+    target_include_directories(sdl-build-options INTERFACE "${SCARLET_SWS_DIR}/include")
+    get_filename_component(SCARLET_SWS_ARCHIVE "${SDL2_SOURCE_DIR}/../target/aarch64-unknown-scarlet/release/libsws_client_c.a" ABSOLUTE)
+    if(NOT EXISTS "${SCARLET_SWS_ARCHIVE}")
+      message(FATAL_ERROR "Build native sws-client-c staticlib before configuring SDL_SCARLET_VIDEO")
+    endif()
+    # EXTRA_LIBS is converted to -l names in sdl2.pc; keep an absolute archive
+    # path as a raw linker argument instead of generating invalid -l/path.a.
+    list(APPEND EXTRA_LDFLAGS "${SCARLET_SWS_ARCHIVE}")
+    list(APPEND SOURCE_FILES "${SDL2_SOURCE_DIR}/src/video/scarlet/SDL_scarletvideo.c")
+  endif()
+  target_compile_definitions(sdl-build-options INTERFACE SDL_SCARLET_NATIVE=1)
+  set(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX 1)
+  set(HAVE_SDL_THREADS TRUE)
+  set(HAVE_SDL_TIMERS TRUE)
+  list(APPEND SOURCE_FILES
+    ${SDL2_SOURCE_DIR}/src/thread/scarlet/SDL_systhread.c
+    ${SDL2_SOURCE_DIR}/src/thread/pthread/SDL_sysmutex.c
+    ${SDL2_SOURCE_DIR}/src/thread/pthread/SDL_syscond.c
+    ${SDL2_SOURCE_DIR}/src/thread/pthread/SDL_systls.c
+    ${SDL2_SOURCE_DIR}/src/thread/generic/SDL_syssem.c
+    ${SDL2_SOURCE_DIR}/src/timer/scarlet/SDL_systimer.c)
+endif()
 CheckLibSampleRate()
 
 # Dummies
