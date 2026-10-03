@@ -1067,13 +1067,15 @@ SDL_GLContext SDL_EGL_CreateContext(_THIS, EGLSurface egl_surface)
             }
 #if defined(SDL_VIDEO_OPENGL) && !defined(SDL_VIDEO_DRIVER_VITA)
         } else {
-            /* Desktop OpenGL supports it by default from version 3.0 on. */
-            void(APIENTRY * glGetIntegervFunc)(GLenum pname, GLint * params);
-            glGetIntegervFunc = SDL_GL_GetProcAddress("glGetIntegerv");
-            if (glGetIntegervFunc) {
-                GLint v = 0;
-                glGetIntegervFunc(GL_MAJOR_VERSION, &v);
-                if (v >= 3) {
+            /* Desktop OpenGL supports it by default from version 3.0 on.
+             * GL_MAJOR_VERSION is invalid before 3.0 and would leave an error
+             * in a fresh legacy context. GL_VERSION is valid in all versions. */
+            const GLubyte *(APIENTRY * glGetStringFunc)(GLenum name);
+            glGetStringFunc = SDL_GL_GetProcAddress("glGetString");
+            if (glGetStringFunc) {
+                const char *version = (const char *)glGetStringFunc(GL_VERSION);
+                int major = 0;
+                if (version && SDL_sscanf(version, "%d", &major) == 1 && major >= 3) {
                     _this->gl_allow_no_surface = SDL_TRUE;
                 }
             }
