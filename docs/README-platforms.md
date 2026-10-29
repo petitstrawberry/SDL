@@ -22,6 +22,7 @@ SDL3 has been known to work on the following platforms at some point:
 - [PlayStation Portable](README-psp.md) (Homebrew)
 - [PlayStation Vita](README-vita.md) (Homebrew)
 - [RISC OS](README-riscos.md)
+- [Scarlet](README-scarlet.md) (Native AArch64)
 - [SteamOS](README-steamos.md)
 - [tvOS](README-ios.md)
 - [visionOS](README-ios.md)

@@ -44,7 +44,11 @@ SDL_SharedObject *SDL_LoadObject(const char *sofile)
     }
 #endif
 
+#ifdef SDL_PLATFORM_SCARLET
+    handle = dlopen(sofile, RTLD_NOW | RTLD_GLOBAL);
+#else
     handle = dlopen(sofile, RTLD_NOW | RTLD_LOCAL);
+#endif
     loaderror = dlerror();
     if (!handle) {
         SDL_SetError("Failed loading %s: %s", sofile, loaderror);

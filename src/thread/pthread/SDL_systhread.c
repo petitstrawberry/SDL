@@ -187,7 +187,9 @@ SDL_ThreadID SDL_GetCurrentThreadID(void)
 
 bool SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 {
-#ifdef SDL_PLATFORM_RISCOS
+#ifdef SDL_PLATFORM_SCARLET
+    return SDL_Unsupported();
+#elif defined(SDL_PLATFORM_RISCOS)
     // FIXME: Setting thread priority does not seem to be supported
     return true;
 #else

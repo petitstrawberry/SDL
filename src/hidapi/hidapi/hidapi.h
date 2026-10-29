@@ -27,7 +27,11 @@
 #ifndef HIDAPI_H__
 #define HIDAPI_H__
 
+#ifdef __scarlet__
+#include <stddef.h>
+#else
 #include <wchar.h>
+#endif
 
 /* #480: this is to be refactored properly for v1.0 */
 #ifdef _WIN32

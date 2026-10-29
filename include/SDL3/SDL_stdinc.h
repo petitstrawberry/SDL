@@ -50,7 +50,12 @@
 
 #include <stdarg.h>
 #include <string.h>
+#ifdef SDL_PLATFORM_SCARLET
+// The Native SDK defines wchar_t through stddef; SDL supplies wide-string APIs.
+#include <stddef.h>
+#else
 #include <wchar.h>
+#endif
 
 /* Most everything except Visual Studio 2008 and earlier has stdint.h now */
 #if defined(_MSC_VER) && (_MSC_VER < 1600)

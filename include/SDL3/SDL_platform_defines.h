@@ -28,6 +28,10 @@
 #ifndef SDL_platform_defines_h_
 #define SDL_platform_defines_h_
 
+#ifdef __scarlet__
+#define SDL_PLATFORM_SCARLET 1
+#endif
+
 #ifdef _AIX
 
 /**

@@ -43,7 +43,10 @@
 #include "TargetConditionals.h"
 #endif
 
-#if defined(SDL_PLATFORM_PRIVATE) // probably not useful on private platforms.
+#if defined(SDL_PLATFORM_SCARLET)
+// Native eager/global loading does not support dynapi self-replacement.
+#define SDL_DYNAMIC_API 0
+#elif defined(SDL_PLATFORM_PRIVATE) // probably not useful on private platforms.
 #define SDL_DYNAMIC_API 0
 #elif defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE // probably not useful on iOS.
 #define SDL_DYNAMIC_API 0

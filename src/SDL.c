@@ -762,6 +762,8 @@ const char *SDL_GetPlatform(void)
 {
 #if defined(SDL_PLATFORM_PRIVATE)
     return SDL_PLATFORM_PRIVATE_NAME;
+#elif defined(SDL_PLATFORM_SCARLET)
+    return "Scarlet";
 #elif defined(SDL_PLATFORM_AIX)
     return "AIX";
 #elif defined(SDL_PLATFORM_ANDROID)
